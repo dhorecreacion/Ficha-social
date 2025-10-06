@@ -1,0 +1,97 @@
+    /* ============================
+    Dashboard CSS
+    (cargar después de css/app.css)
+    ============================ */
+
+    /* Contenedores y tarjetas */
+    .section{
+    background: var(--card, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 22px rgba(2,6,23,.06);
+    padding: 16px;
+    margin-bottom: 14px;
+    }
+
+    /* KPIs */
+    .kpis{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    }
+    .kpi{
+    background: var(--card, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 22px rgba(2,6,23,.06);
+    padding: 14px;
+    }
+    .kpi .label{
+    color: var(--muted, #6b7280);
+    font-size: 12px;
+    }
+    .kpi .value{
+    font-weight: 800;
+    font-size: 22px;
+    margin-top: 6px;
+    }
+
+    /* Barra de filtros / toolbar */
+    .toolbar{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0 12px;
+    }
+    .toolbar .filters{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    }
+    .toolbar select,
+    .toolbar input{
+    padding: 8px 10px;
+    border: 1px solid var(--line, #e5e7eb);
+    border-radius: 10px;
+    background: #fff;
+    }
+
+    /* Grillas para múltiples gráficos */
+    .grid-1{ display:grid; grid-template-columns: 1fr; gap:12px }
+    .grid-2{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px }
+    .grid-3{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px }
+
+    /* Canvas de Chart.js */
+    canvas{
+    width: 100%;
+    height: 320px;         /* alto base; Chart.js ajusta internamente */
+    display: block;
+    }
+
+    /* Mensajes */
+    .msg{
+    min-height: 20px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted, #6b7280);
+    }
+
+    /* Badges reutilizables (por si los usas aquí) */
+    .badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    }
+    .badge.ok{   background:#e8f7ee; color:#166534 }
+    .badge.warn{ background:#fff7ed; color:#9a3412 }
+    .badge.muted{background:#eef2ff; color:#0b3c85 }
+
+    /* Responsivo */
+    @media (max-width:1100px){
+    .kpis{ grid-template-columns: repeat(2, minmax(0,1fr)) }
+    .grid-3{ grid-template-columns: repeat(2, minmax(0,1fr)) }
+    }
+    @media (max-width:780px){
+    .grid-2, .grid-3{ grid-template-columns: 1fr }
+    canvas{ height: 280px }
+    }
