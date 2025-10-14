@@ -174,19 +174,33 @@
     }
 
     // ------- KPIs -------
+    // Helper seguro para escribir en el DOM
+    function setTextSafe(sel, text){
+    const el = document.querySelector(sel);
+    if (el) el.textContent = text;
+    }
+
     function kpis(data){
-    $("#kpiTotal").textContent = data.length;
+    // Si no hay ningún KPI en el DOM, no hacer nada
+    const hasAny = document.querySelector('#kpiTotal')
+                || document.querySelector('#kpiH')
+                || document.querySelector('#kpiM')
+                || document.querySelector('#kpiC');
+    if (!hasAny) return;
+
+    const total = data.length;
 
     const H = data.filter(x => (x.personal?.genero||x.genero) === "Masculino").length;
     const M = data.filter(x => (x.personal?.genero||x.genero) === "Femenino").length;
 
-    $("#kpiH").textContent = H;
-    $("#kpiM").textContent = M;
-
     const prom = Math.round(
         data.reduce((a,x)=>a+pct(x),0) / (data.length || 1)
     );
-    $("#kpiC").textContent = prom + "%";
+
+    setTextSafe('#kpiTotal', String(total));
+    setTextSafe('#kpiH', String(H));
+    setTextSafe('#kpiM', String(M));
+    setTextSafe('#kpiC', prom + '%');
     }
 
     // % de completitud
@@ -249,7 +263,7 @@
 
     // ------- Utilidades -------
     function setMsg(t){ if(msg) msg.textContent = t || ""; }
-    function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','&gt;':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function human(err){
     const map = {
         "permission-denied": "Permisos insuficientes (se requiere administrador).",
