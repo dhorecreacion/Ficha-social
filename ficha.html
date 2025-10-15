@@ -16,39 +16,46 @@
     <link rel="stylesheet" href="css/app.css"/>
 
     <!-- Ajustes locales mínimos -->
+    <!-- Ajustes locales mínimos -->
     <style>
-        .section{background:#fff;border-radius:12px;box-shadow:0 4px 22px rgba(2,6,23,.06);padding:16px;margin-bottom:14px}
-        .section h3{margin:0 0 10px;font-size:16px}
-        .savebar{
+    .section{background:#fff;border-radius:12px;box-shadow:0 4px 22px rgba(2,6,23,.06);padding:16px;margin-bottom:14px}
+    .section h3{margin:0 0 10px;font-size:16px}
+    .savebar{
         position:sticky;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);
         display:flex;gap:12px;align-items:center;justify-content:flex-end;padding:10px 16px;z-index:20
-        }
-        .progress{margin-right:auto;width:180px;height:8px;background:#eef2ff;border-radius:999px;overflow:hidden}
-        .progress > div{height:100%;width:0%;background:#0b3c85}
-        .help{color:#6b7280;font-size:12px;margin-top:-6px}
+    }
+    .progress{margin-right:auto;width:180px;height:8px;background:#eef2ff;border-radius:999px;overflow:hidden}
+    .progress > div{height:100%;width:0%;background:#0b3c85}
+    .help{color:#6b7280;font-size:12px;margin-top:-6px}
 
-        /* Estado ACTIVA/INACTIVA */
-        .status-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:4px 0 12px;}
-        .status-pill{
+    /* Estado ACTIVA/INACTIVA */
+    .status-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:4px 0 12px;}
+    .status-pill{
         justify-self:start;display:inline-flex;align-items:center;justify-content:center;height:36px;
         padding:0 14px;border-radius:999px;font-weight:600;border:1px solid transparent;min-width:120px;
-        }
-        .status-pill.active{color:#065f46;background:#ecfdf5;border-color:#a7f3d0;}
-        .status-pill.inactive{color:#7f1d1d;background:#fef2f2;border-color:#fecaca;}
-        .btn-toggle{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;border-radius:10px;white-space:nowrap;}
+    }
+    .status-pill.active{color:#065f46;background:#ecfdf5;border-color:#a7f3d0;}
+    .status-pill.inactive{color:#7f1d1d;background:#fef2f2;border-color:#fecaca;}
+    .btn-toggle{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;border-radius:10px;white-space:nowrap;}
 
-        /* Rejilla de seguros (editable) */
-        .checks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:start}
-        @media (min-width:1024px){.checks-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
-        .check-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
-        .check-h{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:8px}
-        .check-item input[type="checkbox"]{inline-size:18px;block-size:18px;accent-color:var(--brand,#0b3c85)}
-        .check-date{width:100%;max-width:220px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.92rem}
-        .check-date:disabled{opacity:.6}
+    /* Rejilla de seguros (editable) */
+    .checks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:start}
+    @media (min-width:1024px){.checks-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+    .check-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+    .check-h{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:8px}
+    .check-item input[type="checkbox"]{inline-size:18px;block-size:18px;accent-color:var(--brand,#0b3c85)}
+    .check-date{width:100%;max-width:220px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.92rem}
+    .check-date:disabled{opacity:.6}
 
-        /* Read-only seguros */
-        #segSaludReadOnly{display:none;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px}
-        #segSaludReadOnly ul{margin:0;padding-left:18px}
+    /* Read-only seguros */
+    #segSaludReadOnly{display:none;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px}
+    #segSaludReadOnly ul{margin:0;padding-left:18px}
+
+    /* === NUEVO: vista de invitación ===
+        - Oculta todo lo marcado como data-admin-only
+        - Muestra el bloque de solo lectura de Seguros */
+    body.invite-only [data-admin-only]{display:none !important;}
+    body.invite-only #segSaludReadOnly{display:block !important;}
     </style>
 
     <!-- Guard: solo aplica si NO es link de invitación -->
@@ -299,6 +306,32 @@
                 </div>
             </div>
 
+            <!-- CONTACTO DE EMERGENCIA -->
+            <div class="section">
+                <h3>Contacto de emergencia</h3>
+                <div class="row">
+                <label>Nombres y apellidos
+                    <input name="emergencia.nombre" required/>
+                </label>
+                <label>Parentesco
+                    <select name="emergencia.parentesco" required>
+                    <option value="">Selecciona…</option>
+                    <option>Padre/Madre</option>
+                    <option>Cónyuge/Esposa(o)/Conviviente</option>
+                    <option>Hermano(a)</option>
+                    <option>Hijo(a)</option>
+                    <option>Otro</option>
+                    </select>
+                </label>
+                </div>
+                <div class="row">
+                <label>Teléfono
+                    <input name="emergencia.telefono" inputmode="tel" required/>
+                </label>
+                <label><!-- vacío --></label>
+                </div>
+            </div>
+
             <!-- SALUD -->
             <div class="section">
                 <h3>Salud</h3>
@@ -352,10 +385,10 @@
                     <!-- AMS -->
                     <div class="check-item">
                     <div class="check-h">
-                        <input type="checkbox" name="salud.seguros[]" value="AMS" data-key="AMS"/>
-                        <span>AMS</span>
+                        <input type="checkbox" name="salud.seguros[]" value="AMC" data-key="AMC"/>
+                        <span>AMC</span>
                     </div>
-                    <input type="date" class="check-date" name="salud.segurosFechas.AMS" autocomplete="off"/>
+                    <input type="date" class="check-date" name="salud.segurosFechas.AMC" autocomplete="off"/>
                     </div>
 
                     <!-- FOLA -->
@@ -376,29 +409,6 @@
                 <ul></ul>
                 </div>
 
-            </div>
-
-            <!-- CONTACTO DE EMERGENCIA -->
-            <div class="section">
-                <h3>Contacto de emergencia</h3>
-                <div class="row">
-                <label>Nombres y apellidos
-                    <input name="emergencia.nombre" required/>
-                </label>
-                <label>Parentesco
-                    <select name="emergencia.parentesco" required>
-                    <option value="">Selecciona…</option>
-                    <option>Padre/Madre</option><option>Cónyuge</option><option>Hermano(a)</option>
-                    <option>Hijo(a)</option><option>Otro</option>
-                    </select>
-                </label>
-                </div>
-                <div class="row">
-                <label>Teléfono
-                    <input name="emergencia.telefono" inputmode="tel" required/>
-                </label>
-                <label><!-- vacío --></label>
-                </div>
             </div>
 
             <!-- BARRA INFERIOR -->
@@ -443,3 +453,4 @@
     </div>
     </body>
     </html>
+
