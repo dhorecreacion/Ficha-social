@@ -1,0 +1,108 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Ficha Social — Acceso</title>
+
+    <!-- Perf: precalienta conexiones a Firebase -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="./css/main.css" />
+
+    <!-- Lógica de autenticación (Firebase) -->
+    <script type="module" src="./js/auth.js" defer></script>
+    </head>
+    <body class="login">
+    <main class="card login-card" role="main">
+        <h1>Bienestar Social · Acceso</h1>
+
+        <form id="loginForm" autocomplete="on" class="login-form">
+        <label for="email">
+            Correo
+            <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="nombre@empresa.com"
+            autocomplete="username"
+            inputmode="email"
+            required
+            />
+        </label>
+
+        <label for="password">
+            Contraseña
+            <div class="input-wrap">
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+            />
+            <button
+                type="button"
+                id="togglePass"
+                class="toggle-visibility"
+                aria-label="Mostrar contraseña"
+                aria-pressed="false"
+                title="Mostrar/Ocultar contraseña"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+            </div>
+        </label>
+
+        <button id="btnLogin" type="submit" class="btn primary full">Ingresar</button>
+        </form>
+
+        <div class="actions">
+        <button id="btnReset" type="button" class="link">Olvidé mi contraseña</button>
+        </div>
+
+        <p id="msg" class="msg" role="status" aria-live="polite"></p>
+    </main>
+
+    <noscript>Activa JavaScript para usar la plataforma.</noscript>
+
+    <!-- UX: mostrar/ocultar contraseña (no interfiere con js/auth.js) -->
+    <script>
+        const pass   = document.getElementById('password');
+        const toggle = document.getElementById('togglePass');
+
+        const eye = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>`;
+        const eyeOff = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-6.94"/>
+            <path d="M10.58 10.58a3 3 0 1 0 4.24 4.24"/>
+            <path d="M1 1l22 22"/>
+        </svg>`;
+
+        toggle?.addEventListener('click', () => {
+        const showing = pass.type === 'text';
+        pass.type = showing ? 'password' : 'text';
+        toggle.setAttribute('aria-pressed', String(!showing));
+        toggle.innerHTML = showing ? eye : eyeOff;
+        toggle.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+        pass.focus();
+        });
+    </script>
+    </body>
+    </html>

@@ -1,0 +1,281 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Invitaciones — Bienestar Social</title>
+
+    <!-- Perf: precalienta conexiones a Firebase -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="css/app.css"/>
+
+    <!-- Estilos locales (estructura + responsive) -->
+    <style>
+    .section{background:#fff;border-radius:12px;box-shadow:0 4px 22px rgba(2,6,23,.06);padding:16px;margin-bottom:14px}
+    .grid{display:grid;gap:12px}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+
+    .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:8px 0 12px;flex-wrap:wrap}
+    .muted{color:#6b7280;font-size:12px}
+
+    .copy-wrap{display:flex;gap:8px;align-items:center}
+    .copy-wrap input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+
+    .table-wrap{border-radius:12px;overflow:auto}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px;background:#fff}
+    thead th{font-size:12px;color:#6b7280;text-align:left;padding:10px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:1}
+    tbody td{padding:10px;border-bottom:1px solid #f1f5f9}
+
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+    .badge.ok{background:#e8f7ee;color:#166534}
+    .badge.warn{background:#fff7ed;color:#9a3412}
+    .badge.muted{background:#eef2ff;color:#0b3c85}
+
+    .hidden{display:none !important}
+
+    /* Oculta el botón de menú en desktop (por si no se oculta en app.css) */
+    @media (min-width:821px){ .topbar .btn.link{ display:none } }
+
+    /* ===== Tabla -> Cards (móvil) con acciones al fondo y sin solapes ===== */
+    @media (max-width:760px){
+        .table-wrap{overflow:visible}
+        table.responsive{width:100%;min-width:0;border-collapse:separate;border-spacing:0;background:transparent}
+        table.responsive thead{display:none}
+        table.responsive, table.responsive tbody{display:block;width:100%}
+
+        /* Cada TR es una card */
+        table.responsive tr{
+        position:relative;
+        overflow:hidden;               /* todo queda dentro del card */
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        grid-auto-rows: min-content;   /* altura ajustada por contenido */
+        grid-template-areas:
+            "created expire"
+            "ficha   ficha"
+            "estado  estado"
+            "actions actions";
+        gap: 10px 12px;
+        background:#fff;
+        border:1px solid var(--line);
+        border-radius:16px;
+        box-shadow:0 10px 28px rgba(2,6,23,.06);
+        padding:14px 12px;
+        margin:0 0 12px 0;
+        }
+
+        table.responsive td{
+        display:block;
+        padding:0;
+        border:0;
+        background:transparent;
+        width:100%;
+        position:relative;             /* para stacking predecible */
+        z-index:1;
+        }
+        table.responsive td::before{
+        content:attr(data-label);
+        display:block;
+        color:#94a3b8;
+        font-size:12px;
+        letter-spacing:.2px;
+        margin-bottom:4px;
+        }
+
+        /* Ubicación por áreas */
+        table.responsive td[data-label="Creada"]  { grid-area: created; }
+        table.responsive td[data-label="Expira"]  { grid-area: expire;  text-align:right; }
+        table.responsive td[data-label="Ficha"]   { grid-area: ficha; }
+        table.responsive td[data-label="Estado"]  { grid-area: estado; text-align:right; }
+
+        /* Acciones al final, a lo ancho de la card */
+        table.responsive td[data-label="Acciones"]{
+        grid-area: actions;
+        grid-column: 1 / -1;           /* ocupa ambas columnas */
+        display:flex !important;
+        gap:8px;
+        align-items:center;
+        justify-content:flex-start;
+        flex-wrap:wrap;                /* si no entran, baja a segunda línea */
+        margin-top:6px;
+        padding-top:10px;
+        border-top:1px dashed var(--line);
+        position:relative;
+        z-index:2;                     /* por encima de cualquier contenido */
+        }
+        table.responsive td[data-label="Acciones"]::before{ content:""; display:none; }
+
+        /* Botones cómodos en móvil */
+        table.responsive td[data-label="Acciones"] .btn{
+        height:36px; padding:0 12px; border-radius:12px;
+        box-shadow:0 6px 14px rgba(11,60,133,.10);
+        position:relative; z-index:3;  /* nunca detrás */
+        }
+    }
+
+    /* Ajustes responsive generales */
+    @media (max-width:820px){
+        .row{grid-template-columns:1fr}
+        .copy-wrap{flex-direction:column;align-items:stretch}
+        .copy-wrap input{width:100%}
+        .toolbar{flex-direction:column;align-items:stretch}
+    }
+    </style>
+
+    <!-- Guard: requiere sesión -->
+    <script type="module">
+    import { requireAuth } from "./js/guard.js";
+    requireAuth();
+    </script>
+
+    <!-- Lógica de esta página -->
+    <script type="module" src="js/invitaciones.js" defer></script>
+    </head>
+    <body>
+    <div class="layout">
+    <aside class="aside" id="sidebar">
+        <h2>Bienestar social</h2>
+        <nav class="nav">
+        <a href="fichas.html">Fichas</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="invitaciones.html">Invitaciones</a>
+        <a href="#" id="btnLogout">Cerrar sesión</a>
+        </nav>
+    </aside>
+
+    <main>
+        <header class="topbar">
+        <button id="btnMenu" class="btn link" aria-label="Abrir menú" title="Menú">☰</button>
+        <strong>Invitaciones</strong>
+        <div style="width:40px"></div>
+        </header>
+
+        <div class="content grid">
+        <!-- Aviso si no es admin -->
+        <div id="adminWarn" class="section hidden" role="alert">
+            <strong>Acceso restringido</strong>
+            <p class="muted" style="margin:6px 0 0">
+            Esta página es solo para administradores. Si crees que es un error, consulta con el responsable del sistema.
+            </p>
+        </div>
+
+        <!-- Generar invitación -->
+        <div id="genCard" class="section">
+            <h3 style="margin:0 0 10px">Generar invitación</h3>
+
+            <div class="row">
+            <label>
+                Selecciona la ficha
+                <select id="selFicha" required>
+                <option value="">— Cargando fichas… —</option>
+                </select>
+                <div class="muted">Se cargan las fichas más recientes. Puedes buscar por DNI o nombres.</div>
+            </label>
+
+            <label>
+                Vencimiento (días)
+                <input id="days" type="number" min="1" max="60" value="7" inputmode="numeric"/>
+                <div class="muted">El enlace expirará pasado este tiempo.</div>
+            </label>
+            </div>
+
+            <div class="toolbar">
+            <div class="muted">Consejo: comparte el link por WhatsApp o correo.</div>
+            <div style="display:flex;gap:10px">
+                <button id="btnGen" class="btn primary">Generar link</button>
+            </div>
+            </div>
+
+            <div id="outWrap" class="copy-wrap hidden">
+            <input id="linkOut" type="text" readonly aria-label="Enlace de invitación"/>
+            <button id="btnCopy" class="btn">Copiar</button>
+            </div>
+
+            <p id="msgGen" class="msg"></p>
+        </div>
+
+        <!-- Buscar fichas (filtro del selector) -->
+        <div class="section">
+            <h3 style="margin:0 0 10px">Buscar ficha</h3>
+            <div class="toolbar">
+            <input id="search" type="search" placeholder="Filtrar por DNI o nombres…" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px"/>
+            <span class="muted">Escribe para filtrar el selector de arriba.</span>
+            </div>
+        </div>
+
+        <!-- Invitaciones recientes -->
+        <div class="section">
+            <h3 style="margin:0 0 10px">Invitaciones recientes</h3>
+            <div class="muted" style="margin-bottom:8px">Máx. 100 más recientes.</div>
+
+            <div class="table-wrap">
+            <!-- class="responsive" activa el modo cards en móvil -->
+            <table class="responsive" aria-label="Invitaciones recientes">
+                <thead>
+                <tr>
+                    <th style="width:180px">Creada</th>
+                    <th style="width:140px">Expira</th>
+                    <th>Ficha</th>
+                    <th style="width:120px">Estado</th>
+                    <th style="width:220px;text-align:right">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tbodyInv">
+                <tr><td colspan="5">Cargando…</td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <p id="msgInv" class="msg"></p>
+        </div>
+        </div>
+    </main>
+    </div>
+
+    <noscript>Activa JavaScript para gestionar invitaciones.</noscript>
+
+    <!-- Toggle del sidebar en móvil + etiquetas de tabla responsive -->
+    <script>
+    // Toggle del sidebar
+    const btnMenu = document.getElementById('btnMenu');
+    const sidebar = document.getElementById('sidebar');
+    btnMenu?.addEventListener('click', ()=> sidebar?.classList.toggle('open'));
+    document.querySelectorAll('.aside .nav a').forEach(a=>{
+        a.addEventListener('click', ()=> sidebar?.classList.remove('open'));
+    });
+
+    // Etiquetas responsive: se obtienen del THEAD y se aplican a cada TD
+    (function tagResponsiveTable(){
+        const table = document.querySelector('table.responsive');
+        if(!table) return;
+
+        const headers = Array.from(table.querySelectorAll('thead th'))
+        .map(th => (th.textContent || '').trim());
+
+        const tbody = table.querySelector('tbody');
+        const tagRow = (tr) => {
+        const cells = tr.querySelectorAll('td');
+        cells.forEach((td,i) => td.setAttribute('data-label', headers[i] || ''));
+        };
+
+        // filas existentes
+        tbody.querySelectorAll('tr').forEach(tagRow);
+
+        // filas nuevas (insertadas por invitaciones.js)
+        new MutationObserver(muts=>{
+        muts.forEach(m=>{
+            m.addedNodes.forEach(n=>{
+            if(n.nodeType===1 && n.tagName==='TR') tagRow(n);
+            });
+        });
+        }).observe(tbody, { childList:true });
+    })();
+    </script>
+    </body>
+    </html>

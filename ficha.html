@@ -1,0 +1,455 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Ficha Social</title>
+
+    <!-- Perf: precalienta conexiones a Firebase -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="css/app.css"/>
+
+    <!-- Estilos locales mínimos (solo lo que no está en app.css) -->
+    <style>
+        /* Estado ACTIVA/INACTIVA */
+        .status-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin:0;}
+        .status-pill{
+        justify-self:start;display:inline-flex;align-items:center;justify-content:center;height:36px;
+        padding:0 14px;border-radius:999px;font-weight:600;border:1px solid transparent;min-width:120px;
+        }
+        .status-pill.active{color:#065f46;background:#ecfdf5;border-color:#a7f3d0;}
+        .status-pill.inactive{color:#7f1d1d;background:#fef2f2;border-color:#fecaca;}
+        .btn-toggle{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;border-radius:10px;white-space:nowrap;}
+
+        /* Rejilla de seguros (editable) */
+        .checks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:start}
+        @media (min-width:1024px){.checks-grid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+        .check-item{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px}
+        .check-h{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:8px}
+        .check-item input[type="checkbox"]{inline-size:18px;block-size:18px;accent-color:var(--brand,#0b3c85)}
+        .check-date{width:100%;max-width:220px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.92rem}
+        .check-date:disabled{opacity:.6}
+
+        /* Read-only seguros */
+        #segSaludReadOnly{display:none;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px}
+        #segSaludReadOnly ul{margin:0;padding-left:18px}
+
+        /* Vista de invitación */
+        body.invite-only [data-admin-only]{display:none !important;}
+        body.invite-only #segSaludReadOnly{display:block !important;}
+    </style>
+
+    <!-- Guard: solo aplica si NO es link de invitación -->
+    <script type="module">
+        const p = new URLSearchParams(location.search);
+        const isInvite = p.has("i") && p.has("t");
+        if (!isInvite) {
+        import("./js/guard.js").then(m => m.requireAuth());
+        }
+    </script>
+
+    <!-- Lógica de esta página -->
+    <script type="module" src="js/ficha.js" defer></script>
+    </head>
+    <body>
+    <div class="layout">
+        <aside class="aside" id="sidebar">
+        <h2>Bienestar social</h2>
+        <nav class="nav">
+            <a href="fichas.html">Fichas</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="invitaciones.html">Invitaciones</a>
+            <a href="#" id="btnLogout">Cerrar sesión</a>
+        </nav>
+        </aside>
+
+        <main>
+        <header class="topbar">
+            <button id="btnMenu" class="btn link" aria-label="Abrir menú" title="Menú">☰</button>
+            <strong>Ficha Social</strong>
+            <div style="width:40px"><!-- spacer derecha --></div>
+        </header>
+
+        <div class="content">
+            <!-- Estado ACTIVA/INACTIVA -->
+            <div class="section" style="margin-top:6px">
+            <div class="status-row">
+                <span id="statusActivo" class="status-pill">ACTIVA</span>
+                <button type="button" id="btnToggleActivo" class="btn btn-toggle" data-admin-only>
+                Cambiar estado
+                </button>
+            </div>
+            </div>
+
+            <!-- FORM PRINCIPAL -->
+            <form id="form" class="form" novalidate>
+            <!-- INFORMACIÓN PERSONAL -->
+            <section class="section">
+                <h3>Información personal</h3>
+                <div class="row">
+                <label>DNI
+                    <input name="personal.doc" inputmode="numeric" pattern="\d{8}" maxlength="8" required placeholder="8 dígitos" autocomplete="off"/>
+                </label>
+                <label>Estado civil
+                    <select name="personal.estadoCivil" required>
+                    <option value="">Selecciona…</option>
+                    <option>Soltero(a)</option><option>Casado(a)</option><option>Conviviente</option>
+                    <option>Viudo(a)</option><option>Divorciado(a)</option>
+                    </select>
+                </label>
+                </div>
+
+                <div class="row">
+                <label>Nombres
+                    <input name="personal.nombres" required autocomplete="given-name"/>
+                </label>
+                <label>Apellidos
+                    <input name="personal.apellidos" required autocomplete="family-name"/>
+                </label>
+                </div>
+
+                <div class="row">
+                <label>Género
+                    <select name="personal.genero" required>
+                    <option value="">Selecciona…</option>
+                    <option>Masculino</option><option>Femenino</option><option>Otro</option>
+                    </select>
+                </label>
+                <label>Fecha de nacimiento
+                    <input type="date" name="personal.nacimiento" required autocomplete="bday"/>
+                </label>
+                </div>
+
+                <div class="row">
+                <label>Talla de casaca
+                    <select name="personal.tallaCasaca">
+                    <option value="">Selecciona…</option>
+                    <option>XS</option><option>S</option><option>M</option><option>L</option>
+                    <option>XL</option><option>XXL</option><option>XXXL</option>
+                    </select>
+                </label>
+
+                <label>Talla de pantalón
+                    <select name="personal.tallaPantalon">
+                    <option value="">Selecciona…</option>
+                    <option>XS</option><option>S</option><option>M</option><option>L</option>
+                    <option>XL</option><option>XXL</option><option>XXXL</option>
+                    </select>
+                </label>
+                </div>
+
+                <div class="row">
+                <label>Nacionalidad
+                    <select id="selNacionalidad" name="personal.nacionalidad" required>
+                    <option value="">Selecciona…</option>
+                    <option value="Peruana">Peruana</option>
+                    <option value="Venezolana">Venezolana</option>
+                    <option value="Colombiana">Colombiana</option>
+                    <option value="Ecuatoriana">Ecuatoriana</option>
+                    <option value="Boliviana">Boliviana</option>
+                    <option value="Chilena">Chilena</option>
+                    <option value="Argentina">Argentina</option>
+                    <option value="Brasileña">Brasileña</option>
+                    <option value="Paraguaya">Paraguaya</option>
+                    <option value="Uruguaya">Uruguaya</option>
+                    <option value="Mexicana">Mexicana</option>
+                    <option value="Española">Española</option>
+                    <option value="Estadounidense">Estadounidense</option>
+                    <option value="Canadiense">Canadiense</option>
+                    <option value="Italiana">Italiana</option>
+                    <option value="Francesa">Francesa</option>
+                    <option value="Alemana">Alemana</option>
+                    <option value="China">China</option>
+                    <option value="Japonesa">Japonesa</option>
+                    <option value="Coreana">Coreana</option>
+                    <option value="Filipina">Filipina</option>
+                    <option value="Dominicana">Dominicana</option>
+                    <option value="Cubana">Cubana</option>
+                    <option value="Panameña">Panameña</option>
+                    <option value="OTRA">Otra</option>
+                    </select>
+                </label>
+
+                <label id="wrapNacOtra" class="hidden">Especifica nacionalidad
+                    <input name="personal.nacionalidadOtra" placeholder="Ej. Sueca"/>
+                </label>
+                </div>
+            </section>
+
+            <!-- CONTACTO -->
+            <section class="section">
+                <h3>Contacto</h3>
+                <div class="row">
+                <label>Teléfono
+                    <input name="contacto.telefono" inputmode="tel" autocomplete="tel" required/>
+                </label>
+                <label>Correo
+                    <input type="email" name="contacto.correo" autocomplete="email" required/>
+                </label>
+                </div>
+            </section>
+
+            <!-- UBICACIÓN -->
+            <section class="section">
+                <h3>Ubicación</h3>
+                <div class="row">
+                <label>Dirección
+                    <input name="ubicacion.direccion" required autocomplete="address-line1"/>
+                </label>
+                <label>Referencia
+                    <input name="ubicacion.referencia" placeholder="Opcional" autocomplete="address-line2"/>
+                </label>
+                </div>
+                <div class="row">
+                <label>Departamento
+                    <select id="selDep"  name="ubicacion.departamento" required></select>
+                </label>
+                <label>Provincia
+                    <select id="selProv" name="ubicacion.provincia" required disabled></select>
+                </label>
+                </div>
+                <div class="row">
+                <label>Distrito
+                    <select id="selDist" name="ubicacion.distrito" required disabled></select>
+                </label>
+                <label><!-- vacío --></label>
+                </div>
+            </section>
+
+            <!-- ACADÉMICA -->
+            <section class="section">
+                <h3>Formación académica</h3>
+                <div class="row">
+                <label>Nivel
+                    <select name="academica.nivel">
+                    <option value="">Selecciona…</option>
+                    <option>Secundaria</option><option>Técnico</option><option>Universitario</option><option>Posgrado</option>
+                    </select>
+                </label>
+                <label>Profesión / Carrera
+                    <input name="academica.profesion" placeholder="Ing. Industrial, Psicología, etc."/>
+                </label>
+                </div>
+            </section>
+
+            <!-- LABORAL -->
+            <section class="section">
+                <h3>Información laboral</h3>
+                <div class="row">
+                <label>Fecha de ingreso
+                    <input type="date" name="laboral.fechaIngreso" autocomplete="off"/>
+                </label>
+                <label>Categoría
+                    <select name="laboral.categoria" required>
+                    <option value="">Selecciona…</option>
+                    <option>Obrero</option><option>Empleado</option>
+                    <option>Practicante</option><option>Ejecutivo</option>
+                    </select>
+                </label>
+                </div>
+                <div class="row">
+                <label>Sede
+                    <select name="laboral.sede" required>
+                    <option value="">Selecciona…</option>
+                    <option>Arequipa</option><option>Lima</option><option>Mina</option>
+                    </select>
+                </label>
+                <label>Cargo
+                    <input name="laboral.cargo" placeholder="Puesto"/>
+                </label>
+                </div>
+
+                <!-- Cascada Dirección → Área → Sección -->
+                <div class="row">
+                <label>Dirección corporativa
+                    <select id="selDirCorp" name="laboral.direccionCorporativa"></select>
+                </label>
+                <label>Área
+                    <select id="selAreaCorp" name="laboral.area" disabled></select>
+                </label>
+                </div>
+                <div class="row">
+                <label>Sección
+                    <select id="selSeccionCorp" name="laboral.seccion" disabled></select>
+                </label>
+                <label><!-- vacío --></label>
+                </div>
+            </section>
+
+            <!-- CÓNYUGE -->
+            <section class="section">
+                <h3>Información del cónyuge</h3>
+                <div class="row">
+                <label>Nombres y apellidos
+                    <input name="conyuge.nombre" placeholder="Opcional"/>
+                </label>
+                <label>Fecha de nacimiento
+                    <input type="date" name="conyuge.nacimiento" autocomplete="off"/>
+                </label>
+                </div>
+            </section>
+
+            <!-- HIJOS -->
+            <section class="section">
+                <h3>Hijos</h3>
+                <div id="listHijos" class="form"></div>
+                <div class="toolbar" style="justify-content:flex-end">
+                <button type="button" class="btn" data-add="hijos">+ Añadir hijo</button>
+                </div>
+            </section>
+
+            <!-- CONTACTO DE EMERGENCIA -->
+            <section class="section">
+                <h3>Contacto de emergencia</h3>
+                <div class="row">
+                <label>Nombres y apellidos
+                    <input name="emergencia.nombre" required/>
+                </label>
+                <label>Parentesco
+                    <select name="emergencia.parentesco" required>
+                    <option value="">Selecciona…</option>
+                    <option>Padre/Madre</option>
+                    <option>Cónyuge/Esposa(o)/Conviviente</option>
+                    <option>Hermano(a)</option>
+                    <option>Hijo(a)</option>
+                    <option>Otro</option>
+                    </select>
+                </label>
+                </div>
+                <div class="row">
+                <label>Teléfono
+                    <input name="emergencia.telefono" inputmode="tel" required/>
+                </label>
+                <label><!-- vacío --></label>
+                </div>
+            </section>
+
+            <!-- SALUD -->
+            <section class="section">
+                <h3>Salud</h3>
+                <div class="row">
+                <label>Tipo de sangre
+                    <select name="salud.tipoSangre">
+                    <option value="">Selecciona…</option>
+                    <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
+                    <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+                    </select>
+                </label>
+                <label><!-- vacío --></label>
+                </div>
+
+                <h4 style="margin:8px 0 6px">Alergias</h4>
+                <div id="listAlergias" class="form"></div>
+                <div class="toolbar" style="justify-content:flex-end;margin-top:4px">
+                <button type="button" class="btn" data-add="alergias">+ Añadir alergia</button>
+                </div>
+
+                <h4 style="margin:12px 0 6px">Enfermedades crónicas</h4>
+                <div id="listEnf" class="form"></div>
+                <div class="toolbar" style="justify-content:flex-end;margin-top:4px">
+                <button type="button" class="btn" data-add="enf">+ Añadir enfermedad</button>
+                </div>
+
+                <h4 style="margin:12px 0 6px">Seguros de salud</h4>
+
+                <!-- Bloque editable SOLO para admin -->
+                <div id="segSalud" data-admin-only>
+                <div class="checks-grid">
+                    <!-- ESSALUD -->
+                    <div class="check-item">
+                    <div class="check-h">
+                        <input type="checkbox" name="salud.seguros[]" value="ESSALUD" data-key="ESSALUD"/>
+                        <span>EsSalud</span>
+                    </div>
+                    <input type="date" class="check-date" name="salud.segurosFechas.ESSALUD" autocomplete="off"/>
+                    </div>
+                    <!-- EPS -->
+                    <div class="check-item">
+                    <div class="check-h">
+                        <input type="checkbox" name="salud.seguros[]" value="EPS" data-key="EPS"/>
+                        <span>EPS</span>
+                    </div>
+                    <input type="date" class="check-date" name="salud.segurosFechas.EPS" autocomplete="off"/>
+                    </div>
+                    <!-- AMC -->
+                    <div class="check-item">
+                    <div class="check-h">
+                        <input type="checkbox" name="salud.seguros[]" value="AMC" data-key="AMC"/>
+                        <span>AMC</span>
+                    </div>
+                    <input type="date" class="check-date" name="salud.segurosFechas.AMC" autocomplete="off"/>
+                    </div>
+                    <!-- FOLA -->
+                    <div class="check-item">
+                    <div class="check-h">
+                        <input type="checkbox" name="salud.seguros[]" value="FOLA" data-key="FOLA"/>
+                        <span>FOLA</span>
+                    </div>
+                    <input type="date" class="check-date" name="salud.segurosFechas.FOLA" autocomplete="off"/>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Bloque de SOLO LECTURA (para invitado/no-admin) -->
+                <div id="segSaludReadOnly" class="hidden">
+                <strong>Seguros declarados</strong>
+                <ul></ul>
+                </div>
+            </section>
+
+            <!-- BARRA INFERIOR -->
+            <div class="savebar">
+                <div class="progress" title="Completitud estimada">
+                <div id="progressBar" style="width:0%"></div>
+                </div>
+                <span id="progressPct" class="help">0%</span>
+                <button class="btn primary" type="submit">Guardar</button>
+            </div>
+            </form>
+
+            <p id="msg" class="msg"></p>
+        </div>
+        </main>
+    </div>
+
+    <!-- Templates dinámicos -->
+    <template id="tpl-hijo">
+        <div class="row" data-row="hijo" style="align-items:end; gap:10px">
+        <label>Nombre y Apellidos completos
+            <input data-name="hijos[].nombre" placeholder="Nombre del hijo(a)"/>
+        </label>
+        <label>Fecha de nacimiento
+            <input type="date" data-name="hijos[].nacimiento" autocomplete="off"/>
+        </label>
+        <button type="button" class="btn danger" data-del="hijos" title="Eliminar hijo">✕</button>
+        </div>
+    </template>
+
+    <template id="tpl-texto">
+        <div class="row" data-row="texto" style="align-items:end; gap:10px">
+        <input input placeholder="Escribe aquí"/>
+        <button type="button" class="btn danger" data-del title="Eliminar">✕</button>
+        </div>
+    </template>
+
+    <noscript>Activa JavaScript para usar esta página.</noscript>
+
+    <!-- Loader pantalla completa -->
+    <div id="screenLoader" class="screen-loader hidden" aria-live="polite" aria-busy="true">
+        <div class="spin" title="Cargando…"></div>
+    </div>
+
+    <!-- Toggle del sidebar en móvil -->
+    <script>
+        const btnMenu = document.getElementById('btnMenu');
+        const sidebar = document.getElementById('sidebar');
+        btnMenu?.addEventListener('click', ()=> sidebar?.classList.toggle('open'));
+    </script>
+    </body>
+    </html>

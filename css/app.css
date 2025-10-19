@@ -1,0 +1,491 @@
+    /* ============================
+    App CSS (páginas internas) — Responsive completo
+    (usar en todas las páginas autenticadas)
+    ============================ */
+
+    /* ---------- Variables ---------- */
+    :root{
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+
+    --brand:#0b3c85;
+    --brand-600:#0a3576;
+    --brand-200:#dbeafe;
+
+    --ok:#16a34a;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+
+    --radius:16px;
+    --radius-sm:12px;
+    --shadow:0 20px 50px rgba(2,6,23,.08);
+
+    /* Tipografía fluida (baja levemente en móvil, sin romper iOS) */
+    --fz-base: clamp(14px, 1.5vw, 16px);
+    --fz-small: clamp(11px, 1.2vw, 13px);
+    --fz-h3: clamp(15px, 1.6vw, 18px);
+    }
+
+    /* ---------- Reset básico ---------- */
+    *{ box-sizing:border-box; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    html, body{ height:100% }
+    html{ font-size: var(--fz-base); }
+    body{
+    margin:0; color:var(--ink); background:var(--bg);
+    min-height:100svh;           /* mejor en móviles con barras dinámicas */
+    }
+    img{ max-width:100%; display:block }
+
+    /* ---------- Utilidades ---------- */
+    .hidden{ display:none !important }
+    .muted{ color:var(--muted) }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+    /* ================= Layout con sidebar ================= */
+    .layout{
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    min-height:100svh;
+    }
+
+    /* Sidebar */
+    .aside{
+    position:sticky; top:0;
+    height:100vh; overflow:auto;
+    background:#fff; border-right:1px solid var(--line);
+    padding:18px 16px;
+    }
+    .aside h2{ margin:0 0 12px; font-size:18px; font-weight:800; letter-spacing:.2px }
+    .nav{ display:flex; flex-direction:column; gap:6px }
+    .nav a{
+    display:block; padding:10px 12px; border-radius:10px; color:var(--ink); text-decoration:none;
+    }
+    .nav a:hover{ background:#f3f4f6 }
+    .nav a.active{ background:var(--brand-200); color:var(--brand) }
+
+    /* Topbar */
+    .topbar{
+    position:sticky; top:0; z-index:5;
+    background:#fff; border-bottom:1px solid var(--line);
+    padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+    }
+
+    /* Contenido */
+    .content{
+    padding:16px; max-width:1200px; margin:0 auto;
+    }
+
+    /* ================= Tarjetas / secciones ================= */
+    .section{
+    background:#fff; border-radius:12px;
+    box-shadow:0 4px 22px rgba(2,6,23,.06);
+    padding:16px; margin-bottom:14px;
+    }
+    .section h3{ margin:0 0 10px; font-size: var(--fz-h3); }
+
+    /* ================= Formularios ================= */
+    .form{ display:grid; gap:14px }
+    .row{
+    display:grid; gap:12px;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    /* Etiquetas y campos (con <label>) */
+    label{ display:block; color:var(--muted); font-size:var(--fz-small) }
+    label > input, label > select, label > textarea{
+    width:100%; margin-top:6px; padding:11px 12px;
+    border:1px solid var(--line); border-radius:12px;
+    background:#fff; color:var(--ink); outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    min-height:44px;               /* objetivo táctil */
+    font-size:16px;                /* evita zoom iOS */
+    }
+
+    /* Inputs dentro de .form/.row aunque no estén en label */
+    .form input, .form select, .form textarea,
+    .row > input, .row > select, .row > textarea{
+    width:100%; margin-top:6px; padding:11px 12px;
+    border:1px solid var(--line); border-radius:12px;
+    background:#fff; color:var(--ink); outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    min-height:44px; font-size:16px;
+    }
+
+    /* Focus accesible */
+    input:focus, select:focus, textarea:focus,
+    .form input:focus, .form select:focus, .form textarea:focus,
+    .row > input:focus, .row > select:focus, .row > textarea:focus{
+    border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(11,60,133,.15);
+    }
+
+    .help{ color:var(--muted); font-size:var(--fz-small) }
+
+    /* ================= Savebar (barra inferior) ================= */
+    .savebar{
+    position:sticky; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid var(--line);
+    display:flex; gap:12px; align-items:center; justify-content:flex-end;
+    padding:10px 16px; z-index:10;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+    .progress{ margin-right:auto; width:200px; height:8px; background:#eef2ff; border-radius:999px; overflow:hidden }
+    .progress > div{ height:100%; width:0%; background:var(--brand) }
+
+    /* ================= Botones ================= */
+    .btn, button{
+    appearance:none; border:0; cursor:pointer;
+    background:var(--brand); color:#fff; font-weight:700;
+    padding:10px 14px; border-radius:12px;
+    transition:transform .02s ease, background .15s ease, opacity .15s ease, box-shadow .15s ease;
+    box-shadow: 0 8px 20px rgba(11,60,133,.18);
+    min-height:44px;               /* objetivo táctil */
+    font-size:16px;                /* evita zoom iOS */
+    }
+    .btn:hover, button:hover{ background:var(--brand-600) }
+    .btn:active, button:active{ transform:translateY(1px) }
+    .btn:disabled, button:disabled{ opacity:.6; cursor:not-allowed; box-shadow:none }
+    .btn.primary{ background:var(--brand) }
+    .btn.danger{ background:var(--danger); box-shadow:0 8px 20px rgba(239,68,68,.18) }
+    .btn.link{
+    background:transparent; color:var(--brand);
+    padding:0; border-radius:8px; box-shadow:none;
+    }
+
+    /* Botón con spinner (data-loading="true") */
+    button[data-loading="true"], .btn[data-loading="true"]{
+    position:relative; padding-right:38px;
+    }
+    button[data-loading="true"]::after, .btn[data-loading="true"]::after{
+    content:""; position:absolute; top:50%; right:12px; transform:translateY(-50%);
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.6); border-top-color:#fff;
+    animation:spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    /* ================= Toolbars y buscadores ================= */
+    .toolbar{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin:8px 0 12px }
+    .search input{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff;
+    min-height:44px; font-size:16px;
+    }
+
+    /* ================= Tablas ================= */
+    .table-wrap{
+    background:#fff; border-radius:12px; overflow:auto;
+    box-shadow:0 4px 22px rgba(2,6,23,.06);
+    }
+    table{ width:100%; border-collapse:separate; border-spacing:0; background:#fff }
+    thead th{
+    font-size:var(--fz-small); color:var(--muted); text-align:left;
+    padding:10px; border-bottom:1px solid var(--line);
+    background:#fff;
+    position:sticky; top:0; z-index:1;
+    }
+    tbody td{ padding:10px; border-bottom:1px solid #f1f5f9 }
+    tbody tr:hover{ background:#fafafa }
+
+    /* ================= Mensajes / badges ================= */
+    .msg{ min-height:20px; margin-top:10px; font-size:var(--fz-small); color:var(--muted) }
+    .badge{
+    display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px;
+    }
+    .badge.ok{ background:#e8f7ee; color:#166534 }
+    .badge.warn{ background:#fff7ed; color:#9a3412 }
+    .badge.muted{ background:#eef2ff; color:var(--brand) }
+
+    /* ================= Inputs dinámicos básicos ================= */
+    .input-wrap{ position:relative }
+    .input-wrap .toggle-visibility{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border:0; background:transparent; cursor:pointer;
+    opacity:.75; border-radius:8px;
+    }
+    .input-wrap .toggle-visibility:hover{ opacity:1 }
+    .input-wrap .toggle-visibility svg{ width:20px; height:20px }
+
+    /* ================= Responsive general ================= */
+    @media (max-width:1024px){
+    .layout{ grid-template-columns: 220px 1fr }
+    }
+    @media (max-width:820px){
+    /* Colapsa sidebar por defecto en móvil */
+    .layout{ grid-template-columns: 1fr }
+    .aside{ display:none; position:fixed; inset:auto 0 0 0; top:48px; height:auto; max-height:70vh; }
+    .aside.open{
+        display:block;
+        background:#fff;
+        border-top:1px solid var(--line);
+        box-shadow:0 -10px 30px rgba(2,6,23,.12);
+        z-index:50;
+    }
+    .row{ grid-template-columns: 1fr }         /* formularios a 1 columna */
+    .content{ padding:12px }
+    .topbar{ padding:10px 12px }
+    }
+    @media (max-width:600px){
+    html{ font-size: clamp(14px, 3.5vw, 15px); }  /* baja un poco más */
+    .content{ padding:10px }
+    }
+    @media (max-width:420px){
+    html{ font-size: 14px; }                      /* tamaño mínimo cómodo */
+    .section{ padding:14px }
+    }
+
+    /* ===== MODO INVITACIÓN (solo formulario y layout de 1 columna) ===== */
+    .invite-only .aside,
+    .invite-only .topbar{ display:none !important; }
+    .invite-only .layout{ grid-template-columns: 1fr !important; display:grid; }
+    .invite-only .content{
+    max-width: 920px;
+    margin: 16px auto;
+    min-height: 100svh;
+    }
+
+    /* ================= LOADER DE PANTALLA COMPLETA ================= */
+    .screen-loader{
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    }
+    .screen-loader .spin{
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 4px solid #e5e7eb; border-top-color: var(--brand);
+    animation: spin .9s linear infinite;
+    }
+
+    /* ======= FICHA: filas dinámicas mejor espaciadas ======= */
+
+    /* Hijos: Nombre | Fecha | ✕ (desktop) */
+    #listHijos .row{
+    grid-template-columns: 1fr 230px auto;
+    align-items: end;
+    gap: 14px;
+    margin-top: 8px;
+    }
+    #listHijos .row label{ margin: 0; }
+
+    /* Alergias / Enfermedades: Input | ✕ */
+    #listAlergias .row,
+    #listEnf .row{
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    }
+    #listAlergias .row input,
+    #listEnf .row input{ margin: 0; }
+
+    /* Botón eliminar (✕) con altura del input */
+    #listHijos .row .btn.danger,
+    #listAlergias .row .btn.danger,
+    #listEnf       .row .btn.danger{
+    height: 44px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    border-radius: 12px;
+    }
+
+    /* Espacio antes de toolbars (+ Añadir …) */
+    #listAlergias + .toolbar,
+    #listEnf      + .toolbar,
+    #listHijos    + .toolbar{
+    margin-top: 16px !important;
+    padding-top: 6px;
+    }
+
+    /* Empty states */
+    #listHijos:empty,
+    #listAlergias:empty,
+    #listEnf:empty{
+    position: relative;
+    padding: 14px 12px;
+    min-height: 44px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: #f9fafb;
+    }
+    #listHijos:empty::before,
+    #listAlergias:empty::before,
+    #listEnf:empty::before{
+    content: "";
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.2;
+    display: block;
+    padding-left: 2px;
+    }
+    #listHijos:empty::before{ content: "Aún no has añadido hijos."; }
+    #listAlergias:empty::before{ content: "Aún no registras alergias."; }
+    #listEnf:empty::before{ content: "Aún no registras enfermedades crónicas."; }
+
+    /* Botón rojo de eliminar alineado */
+    .row .btn.danger[data-del]{
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 12px;
+    border-radius: 12px;
+    }
+
+        /* ============================
+    Fichas — Tarjeta móvil (versión limpia)
+    ============================ */
+    @media (max-width: 820px){
+
+    /* Oculta cabecera de tabla y presenta filas como tarjetas */
+    .section table{ display:block; width:100%; }
+    .section thead{ display:none; }
+    .section tbody{ display:grid; gap:12px; }
+    .section tbody tr{
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr;     /* todo en una columna */
+        grid-auto-rows: auto;
+        gap: 6px;
+        padding:14px 14px 12px;
+        background:#fff;
+        border:1px solid rgba(2,6,23,.06);
+        border-radius:12px;
+        box-shadow:0 6px 18px rgba(2,6,23,.06);
+    }
+    .section tbody td{ border:0; padding:0; }
+
+    /* ---------- % Completo: badge fijo arriba-derecha ---------- */
+    .section tbody tr td:nth-child(5){
+        position:absolute !important;
+        top:8px; right:10px; left: auto !important;
+        padding:0; margin:0; line-height:1;
+        width:auto; height:auto; background:transparent;
+    }
+    .section tbody tr td:nth-child(5)::before{ display:none; }
+
+    /* estiliza el contenido como badge, haya o no .badge */
+    .section tbody tr td:nth-child(5) .badge{
+        display:inline-block; padding:3px 8px; font-size:12px; line-height:1;
+        border-radius:999px; background:#fff7ed; color:#9a3412; font-weight:700;
+        box-shadow:0 1px 0 rgba(0,0,0,.02);
+    }
+    .section tbody tr td:nth-child(5):not(:has(.badge)){
+        background:#fff7ed; color:#9a3412; padding:3px 8px; border-radius:999px;
+        font-weight:700; display:inline-block;
+    }
+
+    /* ---------- Cabecera: DNI + Nombre ---------- */
+    /* DNI */
+    .section tbody tr td:nth-child(1){
+        padding-right:72px;            /* deja aire para el badge % */
+        margin-top:2px;
+        font-weight:800;
+        letter-spacing:.2px;
+    }
+    .section tbody tr td:nth-child(1)::before{
+        content:"DNI";
+        display:block; color:#6b7280; font-size:12px; margin-bottom:2px;
+    }
+
+    /* Nombre (Apellidos y Nombres) */
+    .section tbody tr td:nth-child(2){
+        font-size:1rem; font-weight:600;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .section tbody tr td:nth-child(2)::before{
+        content:"Apellidos y Nombres";
+        display:block; color:#6b7280; font-size:12px; margin-bottom:2px;
+    }
+
+    /* ---------- Meta: Sede / Género / Estado / A-I como “label + valor” ---------- */
+    .section tbody tr td:nth-child(3),
+    .section tbody tr td:nth-child(4),
+    .section tbody tr td:nth-child(6),
+    .section tbody tr td:nth-child(7){
+        display:flex; align-items:center; gap:10px;
+        padding-top:4px;
+        border-top:1px dashed #eef2f7;   /* separadores sutiles */
+        min-height:22px;
+    }
+    .section tbody tr td:nth-child(3)::before,
+    .section tbody tr td:nth-child(4)::before,
+    .section tbody tr td:nth-child(6)::before,
+    .section tbody tr td:nth-child(7)::before{
+        color:#6b7280; font-size:12px; content:attr(data-label);
+        min-width:72px;
+    }
+    /* Etiquetas por columna (sin tocar el HTML) */
+    .section tbody tr td:nth-child(3){ --lbl:"Sede" }
+    .section tbody tr td:nth-child(4){ --lbl:"Género" }
+    .section tbody tr td:nth-child(6){ --lbl:"Estado" }
+    .section tbody tr td:nth-child(7){ --lbl:"A/I" }
+    .section tbody tr td:nth-child(3)::before{ content: var(--lbl) }
+    .section tbody tr td:nth-child(4)::before{ content: var(--lbl) }
+    .section tbody tr td:nth-child(6)::before{ content: var(--lbl) }
+    .section tbody tr td:nth-child(7)::before{ content: var(--lbl) }
+
+    /* Valor alineado a la derecha si es texto simple */
+    .section tbody tr td:nth-child(3),
+    .section tbody tr td:nth-child(4),
+    .section tbody tr td:nth-child(6){
+        justify-content: space-between;
+    }
+    /* Si trae un .badge (A/I), lo dejamos a continuación del label */
+    .section tbody tr td:nth-child(7){
+        gap:6px;
+    }
+
+    /* ---------- Acciones ---------- */
+    .section tbody tr td:last-child{
+        display:flex; justify-content:flex-end; gap:10px;
+        margin-top:8px;
+    }
+    .section tbody tr td:last-child::before{ display:none; }
+    .section tbody tr .btn{
+        min-height:40px; padding:8px 14px; border-radius:12px;
+    }
+    }
+
+    /* Pequeño ajuste en pantallas muy estrechas */
+    @media (max-width: 420px){
+    .section tbody tr{ padding:12px 12px 10px; }
+    .section tbody tr td:nth-child(1){ padding-right:64px; }
+    }
+
+    /* Mostrar el botón hamburguesa solo en móvil */
+    #btnMenu{ 
+    display:none;                       /* oculto por defecto (desktop) */
+    }
+
+    @media (max-width:820px){
+    #btnMenu{
+        display:inline-flex;              /* visible en móvil/tablet */
+        align-items:center;
+        justify-content:center;
+        width:36px; height:36px;
+        padding:0;                        /* que no agrande la topbar */
+    }
+    }
+
+
+    /* ======= Ajustes móviles para las filas dinámicas ======= */
+    @media (max-width:680px){
+    /* Hijos: Nombre | Fecha | ✕ -> 1fr 1fr auto */
+    #listHijos .row{ grid-template-columns: 1fr 1fr auto; }
+    }
+    @media (max-width:520px){
+    /* Hijos: apilar campos y dejar ✕ al final */
+    #listHijos .row{ grid-template-columns: 1fr; }
+    #listHijos .row .btn.danger{ justify-self:end; margin-top:6px; }
+    /* Alergias/Enf: apilar */
+    #listAlergias .row, #listEnf .row{ grid-template-columns: 1fr; }
+    #listAlergias .row .btn.danger,
+    #listEnf .row .btn.danger{ justify-self:end; margin-top:6px; }
+    }

@@ -1,0 +1,163 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Fichas — Bienestar Social</title>
+
+    <!-- Perf: precalienta conexiones a Firebase -->
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+
+    <!-- Estilos globales de la app -->
+    <link rel="stylesheet" href="css/app.css"/>
+
+    <!-- Estilos locales mínimos -->
+    <style>
+        .section{background:#fff;border-radius:12px;box-shadow:0 4px 22px rgba(2,6,23,.06);padding:16px;margin-bottom:14px}
+        .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+        .kpi{background:#fff;border-radius:12px;box-shadow:0 4px 22px rgba(2,6,23,.06);padding:14px}
+        .kpi .label{color:#6b7280;font-size:12px}
+        .kpi .value{font-weight:800;font-size:22px;margin-top:6px}
+
+        /* Toolbar apilable en móvil */
+        .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+        .toolbar.stack{flex-wrap:wrap;gap:8px 10px}
+        .toolbar.stack > *{flex:1 1 260px}
+        .toolbar .right{display:flex;gap:10px;align-items:center;flex:0 0 auto}
+
+        /* Buscador + select */
+        .search{flex:1;min-width:240px;max-width:680px;display:flex;gap:10px;align-items:center}
+        .search input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+        .input{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+
+        /* Tabla base */
+        table{width:100%;border-collapse:separate;border-spacing:0}
+        thead th{font-size:12px;color:#6b7280;text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+        tbody td{padding:10px;border-bottom:1px solid #f1f5f9}
+
+        .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px}
+        .badge.ok{background:#e8f7ee;color:#166534}
+        .badge.warn{background:#fff7ed;color:#9a3412}
+        .badge.muted{background:#eef2ff;color:#0b3c85}
+
+        /* Tabla responsive “stacked” (aplica a .table--stack) */
+        @media (max-width:680px){
+        .table--stack thead{display:none}
+        .table--stack,
+        .table--stack tbody,
+        .table--stack tr,
+        .table--stack td{display:block;width:100%}
+        .table--stack tr{
+            background:#fff;border:1px solid var(--line);border-radius:12px;
+            padding:10px 12px;margin-bottom:10px;
+            box-shadow:0 4px 14px rgba(2,6,23,.04);
+        }
+        .table--stack td{border:none;padding:6px 0}
+        .table--stack td::before{
+            content:attr(data-label);
+            display:block;color:#6b7280;font-size:12px;margin-bottom:2px
+        }
+        .table--stack td[data-label*="%"]{ text-align:right }
+        .table--stack td.actions{ padding-top:8px }
+        .toolbar .right{ width:100%; justify-content:flex-end }
+        }
+    </style>
+
+    <!-- Guard: requiere sesión (NO es página de invitación) -->
+    <script type="module">
+        import { requireAuth } from "./js/guard.js";
+        requireAuth();
+    </script>
+
+    <!-- Lógica de esta página -->
+    <script type="module" src="js/fichas.js" defer></script>
+    </head>
+    <body>
+    <div class="layout">
+        <aside class="aside">
+        <h2>Bienestar social</h2>
+        <nav class="nav">
+            <a class="active" href="fichas.html">Fichas</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="invitaciones.html">Invitaciones</a>
+            <a href="#" id="btnLogout">Cerrar sesión</a>
+        </nav>
+        </aside>
+
+        <div>
+        <div class="topbar">
+            <!-- Botón menú (móvil) -->
+            <button id="btnMenu" class="btn btn-menu" aria-label="Abrir menú" aria-expanded="false">☰</button>
+            <strong>Fichas</strong>
+        </div>
+
+        <div class="content">
+
+            <!-- Barra de herramientas -->
+            <div class="toolbar stack">
+            <div class="search">
+                <input id="search" type="search" placeholder="Buscar por DNI o nombres…"/>
+                <!-- Filtro de estado junto al buscador -->
+                <select id="fltEstado" class="input" title="Estado">
+                <option value="act" selected>Activas</option>
+                <option value="inact">Inactivas</option>
+                <option value="all">Todas</option>
+                </select>
+            </div>
+
+            <div class="right">
+                <button id="btnExport" class="btn">Exportar CSV</button>
+                <button id="btnNew" class="btn primary">Nueva ficha</button>
+            </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="section">
+            <table class="table--stack" id="tablaFichas" aria-label="Listado de fichas">
+                <thead>
+                <tr>
+                    <th style="width:120px">DNI</th>
+                    <th>Apellidos y Nombres</th>
+                    <th style="width:120px">Sede</th>
+                    <th style="width:120px">Género</th>
+                    <th style="width:120px">% Completo</th>
+                    <th style="width:120px">Estado</th>
+                    <th style="width:80px">A/I</th>
+                    <th style="width:160px;text-align:right">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                <!-- Ejemplo de fila (mientras carga) -->
+                <tr>
+                    <td data-label="DNI" colspan="8">Cargando…</td>
+                </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <p id="msg" class="msg"></p>
+        </div>
+        </div>
+    </div>
+
+    <noscript>Activa JavaScript para ver las fichas.</noscript>
+
+    <!-- Toggle del menú lateral en móvil -->
+    <script>
+        const aside = document.querySelector('.aside');
+        const btnMenu = document.getElementById('btnMenu');
+        btnMenu?.addEventListener('click', () => {
+        aside?.classList.toggle('open');
+        const expanded = btnMenu.getAttribute('aria-expanded') === 'true';
+        btnMenu.setAttribute('aria-expanded', String(!expanded));
+        });
+        document.querySelectorAll('.aside .nav a').forEach(a=>{
+        a.addEventListener('click', ()=> aside?.classList.remove('open'));
+        });
+    </script>
+    </body>
+    </html>
