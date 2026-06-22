@@ -18,7 +18,6 @@
     console.log("firebase-config cargado");
 
     export const ADMIN_UIDS = new Set([
-    "FWqjOlSz4HOyR7ZDjPCVL6t6iUp2",
     "bFsNvjtDXyZolGITD5KeZnBpE2B3"
     ]);
 

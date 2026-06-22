@@ -7,6 +7,17 @@
     serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+    let orgEstructura = [];
+
+    async function fetchOrgEstructura() {
+    try {
+        const res = await fetch("./org-estructura.json");
+        orgEstructura = await res.json();
+    } catch (e) {
+        console.error("No se pudo cargar org-estructura.json:", e);
+    }
+    }
+
     const SEGURO_OPTIONS = [
     "ESSALUD",
     "EPS",
@@ -32,6 +43,14 @@
     const tallaPantalonEl = $("#tallaPantalon");
     const chkDeclaracionHerederos = $("#chkDeclaracionHerederos");
 
+    const editCategoriaEl  = $("#editCategoria");
+    const editSedeEl       = $("#editSede");
+    const editCargoEl      = $("#editCargo");
+    const editFechaIngresoEl = $("#editFechaIngreso");
+    const editDireccionEl  = $("#editDireccion");
+    const editAreaEl       = $("#editArea");
+    const editSeccionEl    = $("#editSeccion");
+
     const params = new URLSearchParams(window.location.search);
     const fichaId = params.get("id");
 
@@ -54,11 +73,91 @@
     }
 
     bindEvents();
+    await fetchOrgEstructura();
     await cargarFicha();
     });
 
+    /* ---- Cascada Dirección → Área → Sección ---- */
+    function orgDirecciones() {
+    return [...new Set(orgEstructura.map((r) => r.Direccion))].sort();
+    }
+
+    function orgAreas(dir) {
+    return [...new Set(
+        orgEstructura.filter((r) => r.Direccion === dir).map((r) => r.Area)
+    )].sort();
+    }
+
+    function orgSecciones(dir, area) {
+    return [...new Set(
+        orgEstructura.filter((r) => r.Direccion === dir && r.Area === area).map((r) => r.Seccion)
+    )].sort();
+    }
+
+    function fillSelect(el, options, placeholder, current) {
+    if (!el) return;
+    const currentLower = (current || "").trim().toLowerCase();
+    el.innerHTML = `<option value="">— ${placeholder} —</option>` +
+        options.map((o) => `<option value="${o}"${o.toLowerCase() === currentLower ? " selected" : ""}>${o}</option>`).join("");
+    }
+
+    // Devuelve el valor canónico del JSON que coincide (ignora mayúsculas/minúsculas)
+    function canonicalize(stored, options) {
+    const lower = (stored || "").trim().toLowerCase();
+    return options.find((o) => o.toLowerCase() === lower) || "";
+    }
+
+    function initDireccionSelect(currentDir) {
+    fillSelect(editDireccionEl, orgDirecciones(), "Seleccionar", currentDir);
+    }
+
+    function refreshAreaSelect(dir, currentArea) {
+    if (!dir) {
+        fillSelect(editAreaEl, [], "Seleccionar dirección primero", "");
+        fillSelect(editSeccionEl, [], "Seleccionar área primero", "");
+        return;
+    }
+    fillSelect(editAreaEl, orgAreas(dir), "Seleccionar", currentArea);
+    }
+
+    function refreshSeccionSelect(dir, area, currentSeccion) {
+    if (!dir || !area) {
+        fillSelect(editSeccionEl, [], "Seleccionar área primero", "");
+        return;
+    }
+    fillSelect(editSeccionEl, orgSecciones(dir, area), "Seleccionar", currentSeccion);
+    }
+
+    function loadLaboralEditors(r) {
+    if (editCategoriaEl)    editCategoriaEl.value    = r.laboral?.categoria    || "";
+    if (editSedeEl)         editSedeEl.value         = r.laboral?.sede         || "";
+    if (editCargoEl)        editCargoEl.value        = r.laboral?.cargo        || "";
+    if (editFechaIngresoEl) editFechaIngresoEl.value = r.laboral?.fechaIngreso || "";
+
+    // Normaliza contra los valores canónicos del JSON (ignora diferencias de capitalización)
+    const rawDir  = r.laboral?.direccionCorporativa || "";
+    const rawArea = r.laboral?.area    || "";
+    const rawSec  = r.laboral?.seccion || "";
+
+    const dir  = canonicalize(rawDir,  orgDirecciones());
+    const area = canonicalize(rawArea, orgAreas(dir));
+    const sec  = canonicalize(rawSec,  orgSecciones(dir, area));
+
+    initDireccionSelect(dir);
+    refreshAreaSelect(dir, area);
+    refreshSeccionSelect(dir, area, sec);
+    }
+
     function bindEvents() {
     btnGuardar?.addEventListener("click", guardarCambios);
+
+    editDireccionEl?.addEventListener("change", () => {
+        refreshAreaSelect(editDireccionEl.value, "");
+    });
+
+    editAreaEl?.addEventListener("change", () => {
+        refreshSeccionSelect(editDireccionEl?.value || "", editAreaEl.value, "");
+    });
 
     btnObservar?.addEventListener("click", async () => {
         estadoEl.value = "observado";
@@ -194,6 +293,7 @@
     renderEstadoBadge(r.estado || "borrador");
     renderActivoBadge(r.meta?.activo !== false);
     renderSegurosEditor(r.salud?.seguros, r.salud?.segurosFechas);
+    loadLaboralEditors(r);
     applyAdminPermissions();
     }
 
@@ -210,6 +310,14 @@
     if (tallaCasacaEl) tallaCasacaEl.disabled = !isAdmin;
     if (tallaPantalonEl) tallaPantalonEl.disabled = !isAdmin;
     if (chkDeclaracionHerederos) chkDeclaracionHerederos.disabled = !isAdmin;
+
+    if (editCategoriaEl)    editCategoriaEl.disabled    = !isAdmin;
+    if (editSedeEl)         editSedeEl.disabled         = !isAdmin;
+    if (editCargoEl)        editCargoEl.disabled        = !isAdmin;
+    if (editFechaIngresoEl) editFechaIngresoEl.disabled = !isAdmin;
+    if (editDireccionEl)    editDireccionEl.disabled    = !isAdmin;
+    if (editAreaEl)         editAreaEl.disabled         = !isAdmin;
+    if (editSeccionEl)      editSeccionEl.disabled      = !isAdmin;
 
     if (btnGuardar) btnGuardar.disabled = !isAdmin;
     if (btnObservar) btnObservar.disabled = !isAdmin;
@@ -249,6 +357,16 @@
         contacto: {
             ...(fichaData?.contacto || {}),
             correo
+        },
+        laboral: {
+            ...(fichaData?.laboral || {}),
+            categoria:            (editCategoriaEl?.value    || ""),
+            sede:                 (editSedeEl?.value         || ""),
+            cargo:                (editCargoEl?.value        || "").trim(),
+            fechaIngreso:         (editFechaIngresoEl?.value || ""),
+            direccionCorporativa: (editDireccionEl?.value    || ""),
+            area:                 (editAreaEl?.value         || ""),
+            seccion:              (editSeccionEl?.value      || "")
         },
         salud: {
             ...(fichaData?.salud || {}),
@@ -305,6 +423,16 @@
         contacto: {
             ...(fichaData?.contacto || {}),
             correo
+        },
+        laboral: {
+            ...(fichaData?.laboral || {}),
+            categoria:            (editCategoriaEl?.value    || ""),
+            sede:                 (editSedeEl?.value         || ""),
+            cargo:                (editCargoEl?.value        || "").trim(),
+            fechaIngreso:         (editFechaIngresoEl?.value || ""),
+            direccionCorporativa: (editDireccionEl?.value    || ""),
+            area:                 (editAreaEl?.value         || ""),
+            seccion:              (editSeccionEl?.value      || "")
         },
         salud: {
             ...(fichaData?.salud || {}),

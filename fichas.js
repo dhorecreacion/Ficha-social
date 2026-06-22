@@ -481,7 +481,7 @@
         "DNI", "Apellidos", "Nombres", "Nombre completo",
         // Personal
         "Género", "Fecha nacimiento", "Edad", "Estado civil", "Nacionalidad",
-        "Talla casaca",
+        "Talla casaca", "Talla pantalón",
         // Contacto
         "Correo", "Teléfono",
         // Ubicación
@@ -524,7 +524,8 @@
         const hijos     = Array.isArray(r.hijos) ? r.hijos : Array.isArray(r.familia?.hijos) ? r.familia.hijos : [];
         const seguros   = Array.isArray(r.salud?.seguros) ? r.salud.seguros.join(", ") : "";
         const alergias  = Array.isArray(r.salud?.alergias) ? r.salud.alergias.join(", ") : "";
-        const enf       = Array.isArray(r.salud?.enfermedadesCronicas) ? r.salud.enfermedadesCronicas.join(", ") : "";
+        const enfArr    = r.salud?.enfermedades || r.salud?.enfermedadesCronicas || [];
+        const enf       = Array.isArray(enfArr) ? enfArr.join(", ") : "";
 
         const fixed = [
         // Identificación
@@ -538,7 +539,8 @@
         calcEdad(nacStr),
         r.personal?.estadoCivil || "",
         r.personal?.nacionalidad || "",
-        r.personal?.tallaCasaca  || "",
+        r.personal?.tallaCasaca   || "",
+        r.personal?.tallaPantalon || "",
         // Contacto
         r.contacto?.correo    || "",
         r.contacto?.telefono  || "",
