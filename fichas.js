@@ -495,6 +495,9 @@
         "Contacto emergencia", "Teléfono emergencia", "Parentesco emergencia",
         // Salud
         "Tipo de sangre", "Alergias", "Enfermedades crónicas", "Seguros",
+        // Cónyuge
+        "Cónyuge nombres", "Cónyuge apellidos", "Cónyuge nacimiento",
+        "Cónyuge ocupación", "Cónyuge correo", "Cónyuge teléfono",
         // Hijos resumen
         "Tiene hijos", "Nro. hijos",
         // Estado
@@ -570,6 +573,19 @@
         alergias,
         enf,
         seguros,
+        // Cónyuge
+        ...(() => {
+            const c = r.familia?.conyuge || r.conyuge || null;
+            if (!c) return ["", "", "", "", "", ""];
+            return [
+            c.nombres    || "",
+            c.apellidos  || "",
+            c.fechaNacimiento || c.nacimiento || "",
+            c.ocupacion  || "",
+            c.correo     || "",
+            c.telefono   || ""
+            ];
+        })(),
         // Hijos resumen
         hijos.length > 0 ? "Sí" : "No",
         hijos.length,
