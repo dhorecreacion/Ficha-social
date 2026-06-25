@@ -806,8 +806,9 @@
     renderActivoBadge(activo);
     renderHererosBadge(getNested(ficha, ["meta.declaracionHerederos"], false) === true);
 
-    // Pre-marcar ambas declaraciones si ya fueron aceptadas anteriormente (1 solo campo Firebase)
-    const yaAcepto = getNested(ficha, ["meta.declaracionDatos"], false) === true;
+    // Pre-marcar ambas declaraciones si ya fueron aceptadas o si la ficha ya fue enviada antes
+    const yaAcepto = getNested(ficha, ["meta.declaracionDatos"], false) === true
+        || (ficha.estado && ficha.estado !== "borrador");
     const chk1 = $("#chkDeclaracion1");
     const chk2 = $("#chkDeclaracion2");
     if (chk1) chk1.checked = yaAcepto;
