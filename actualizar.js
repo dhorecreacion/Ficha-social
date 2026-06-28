@@ -46,12 +46,13 @@
     enfermedades: null
     };
 
-    function showToast(texto = "✓ Ficha guardada correctamente") {
+    function showToast(texto, tipo = "success") {
     const el = document.getElementById("toast-guardado");
     if (!el) return;
     el.textContent = texto;
+    el.style.background = tipo === "error" ? "#dc2626" : "#16a34a";
     el.classList.add("show");
-    setTimeout(() => el.classList.remove("show"), 3500);
+    setTimeout(() => el.classList.remove("show"), tipo === "error" ? 5000 : 3500);
     }
 
     function setMsg(text, type = "info") {
@@ -1154,16 +1155,19 @@
 
     async function guardarFicha() {
     if (!fichaId) {
-        setMsg("No se encontró el identificador de la ficha.", "error");
+        showToast("No se encontró el identificador de la ficha.", "error");
         return;
     }
 
     if (!fichaActual) {
-        setMsg("La ficha aún no está lista para ser actualizada.", "error");
+        showToast("La ficha aún no está lista. Recarga la página.", "error");
         return;
     }
 
-    if (!validarFormulario()) return;
+    if (!validarFormulario()) {
+        showToast("Revisa los campos marcados en rojo.", "error");
+        return;
+    }
 
     try {
         btnGuardar.disabled = true;
@@ -1179,7 +1183,11 @@
         showToast("✓ Ficha guardada correctamente");
     } catch (error) {
         console.error("Error al guardar ficha:", error);
-        setMsg(`No se pudo guardar la ficha. ${error.code || error.message || ""}`, "error");
+        const errMsg = error.code === "permission-denied"
+            ? "Sin permiso para guardar. Vuelve a iniciar sesión."
+            : `No se pudo guardar. ${error.code || error.message || ""}`;
+        showToast(errMsg, "error");
+        setMsg(errMsg, "error");
     } finally {
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = `<i class="bi bi-floppy" style="margin-right:6px;"></i>Guardar cambios`;
