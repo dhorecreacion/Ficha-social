@@ -46,6 +46,14 @@
     enfermedades: null
     };
 
+    function showToast(texto = "✓ Ficha guardada correctamente") {
+    const el = document.getElementById("toast-guardado");
+    if (!el) return;
+    el.textContent = texto;
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 3500);
+    }
+
     function setMsg(text, type = "info") {
     if (!msg) return;
 
@@ -60,6 +68,9 @@
     const el = $(selector);
     if (el) el.value = value ?? "";
     }
+
+    const TALLA_PANTALON_LEGACY = { XS:"26", S:"28", M:"30", L:"32", XL:"34", XXL:"36", XXXL:"38" };
+    function normTallaPantalon(v) { return TALLA_PANTALON_LEGACY[v] || v || ""; }
 
     function setText(selector, value) {
     const el = $(selector);
@@ -755,7 +766,7 @@
     toggleNacionalidadOtra();
 
     setValue("#tallaCasaca", getNested(ficha, ["personal.tallaCasaca"], ""));
-    setValue("#tallaPantalon", getNested(ficha, ["personal.tallaPantalon"], ""));
+    setValue("#tallaPantalon", normTallaPantalon(getNested(ficha, ["personal.tallaPantalon"], "")));
 
     setValue("#telefono", getNested(ficha, ["contacto.telefono", "personal.telefono"], ""));
     setValue("#correo", getNested(ficha, ["contacto.correo"], ""));
@@ -1164,8 +1175,8 @@
 
         await setDoc(ref, payload, { merge: true });
 
-        setMsg("Tu ficha fue actualizada correctamente.", "success");
         await loadFicha();
+        showToast("✓ Ficha guardada correctamente");
     } catch (error) {
         console.error("Error al guardar ficha:", error);
         setMsg(`No se pudo guardar la ficha. ${error.code || error.message || ""}`, "error");

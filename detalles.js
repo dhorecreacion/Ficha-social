@@ -241,7 +241,8 @@
     $("#observacionAdmin").value = r.admin?.observacion || "";
 
     if (tallaCasacaEl) tallaCasacaEl.value = r.personal?.tallaCasaca || "";
-    if (tallaPantalonEl) tallaPantalonEl.value = r.personal?.tallaPantalon || "";
+    const TALLA_PANTALON_LEGACY = { XS:"26", S:"28", M:"30", L:"32", XL:"34", XXL:"36", XXXL:"38" };
+    if (tallaPantalonEl) tallaPantalonEl.value = TALLA_PANTALON_LEGACY[r.personal?.tallaPantalon] || r.personal?.tallaPantalon || "";
     if (chkDeclaracionHerederos) chkDeclaracionHerederos.checked = r.meta?.declaracionHerederos === true;
 
     $("#estadoCivil").textContent = r.personal?.estadoCivil || "-";

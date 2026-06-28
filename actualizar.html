@@ -377,6 +377,28 @@
             flex: 1;
         }
         }
+        #toast-guardado {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: #16a34a;
+        color: #fff;
+        padding: 13px 26px;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+        white-space: nowrap;
+        }
+        #toast-guardado.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        }
     </style>
     </head>
     <body>
@@ -971,6 +993,8 @@
         </div>
         </main>
     </div>
+
+    <div id="toast-guardado">✓ Ficha guardada correctamente</div>
 
     <script type="module" src="actualizar.js"></script>
     <script type="module" src="logout.js"></script>
