@@ -543,18 +543,18 @@
         nacStr,
         calcEdad(nacStr),
         r.personal?.estadoCivil || "",
-        r.personal?.nacionalidad || "",
+        r.personal?.nacionalidadOtra || r.personal?.nacionalidad || "",
         r.personal?.tallaCasaca   || "",
         r.personal?.tallaPantalon || "",
         // Contacto
         r.contacto?.correo    || "",
         r.contacto?.telefono  || "",
         // Ubicación
-        r.ubicacion?.direccion   || "",
-        r.ubicacion?.referencia  || "",
-        r.ubicacion?.departamento || "",
-        r.ubicacion?.provincia   || "",
-        r.ubicacion?.distrito    || "",
+        r.ubicacion?.direccion    || r.contacto?.direccion    || "",
+        r.ubicacion?.referencia   || r.contacto?.referencia   || "",
+        r.ubicacion?.departamento || r.contacto?.departamento || "",
+        r.ubicacion?.provincia    || r.contacto?.provincia    || "",
+        r.ubicacion?.distrito     || r.contacto?.distrito     || "",
         // Laboral
         r.laboral?.sede                  || "",
         r.laboral?.cargo                 || "",
@@ -564,8 +564,8 @@
         r.laboral?.seccion               || "",
         r.laboral?.fechaIngreso          || "",
         // Académico
-        r.academica?.nivel     || "",
-        r.academica?.profesion || "",
+        r.academica?.nivel     || r.salud?.nivelAcademico || "",
+        r.academica?.profesion || r.salud?.profesion      || "",
         // Emergencia
         (r.familia?.emergencia?.nombre     || r.emergencia?.nombre     || ""),
         (r.familia?.emergencia?.telefono   || r.emergencia?.telefono   || ""),
