@@ -226,10 +226,10 @@
     function renderFicha(r) {
     const nombreCompleto = `${r.personal?.apellidos || ""} ${r.personal?.nombres || ""}`.trim();
     const direccionCompleta = [
-        r.ubicacion?.direccion,
-        r.ubicacion?.distrito,
-        r.ubicacion?.provincia,
-        r.ubicacion?.departamento
+        r.ubicacion?.direccion   || r.contacto?.direccion,
+        r.ubicacion?.distrito    || r.contacto?.distrito,
+        r.ubicacion?.provincia   || r.contacto?.provincia,
+        r.ubicacion?.departamento || r.contacto?.departamento
     ].filter(Boolean).join(", ");
 
     $("#dni").value = r.personal?.doc || "";
@@ -260,8 +260,8 @@
     $("#direccionCorporativa").textContent = r.laboral?.direccionCorporativa || "-";
     $("#seccion").textContent = r.laboral?.seccion || "-";
 
-    $("#nivelAcademico").textContent = r.academica?.nivel || "-";
-    $("#profesion").textContent = r.academica?.profesion || "-";
+    $("#nivelAcademico").textContent = r.academica?.nivel || r.salud?.nivelAcademico || "-";
+    $("#profesion").textContent = r.academica?.profesion || r.salud?.profesion || "-";
 
     const conyugeData = r.familia?.conyuge || r.conyuge || null;
     const conyugeNombreCompleto = [conyugeData?.nombres, conyugeData?.apellidos].filter(Boolean).join(" ") || conyugeData?.nombre || "-";

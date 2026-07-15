@@ -19,6 +19,7 @@
     const tbody = $("#tbody");
     const btnNew = $("#btnNew");
     const btnExport = $("#btnExport");
+    const btnConsolidado = $("#btnConsolidado");
     const btnFiltrar = $("#btnFiltrar");
     const search = $("#search");
     const filtroEstado = $("#fltEstado");
@@ -78,6 +79,7 @@
     btnCrearDesdeModal?.addEventListener("click", createAndGo);
 
     btnExport?.addEventListener("click", exportXLSX);
+    btnConsolidado?.addEventListener("click", exportConsolidadoJSON);
     filtroDeclaracion?.addEventListener("change", render);
     filtroHerederos?.addEventListener("change", render);
 
@@ -634,6 +636,39 @@
 
     const filename = `fichas-${new Date().toISOString().slice(0, 10)}.xlsx`;
     XLSX.writeFile(wb, filename);
+    }
+
+    async function exportConsolidadoJSON() {
+    const clave = prompt("Ingresa la contraseña para descargar el consolidado:");
+    if (clave !== "calidaddevida") {
+        if (clave !== null) alert("Contraseña incorrecta.");
+        return;
+    }
+
+    const btn = btnConsolidado;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:8px;"></i>Descargando...';
+    }
+    try {
+        const snap = await getDocs(query(collection(db, "fichas"), orderBy("createdAt", "desc")));
+        const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const blob = new Blob([JSON.stringify(all, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `consolidado-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("Error exportando consolidado:", e);
+        alert("No se pudo exportar. Revisa la consola.");
+    } finally {
+        if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-download" style="margin-right:8px;"></i>Consolidado';
+        }
+    }
     }
 
     async function del(id) {
